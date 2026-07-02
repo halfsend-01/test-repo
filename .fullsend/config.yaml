@@ -1,0 +1,22 @@
+# fullsend per-repo configuration
+# https://github.com/fullsend-ai/fullsend
+#
+# This file configures fullsend for per-repo installation mode.
+# See ADR 0033 for details.
+version: "1"
+runtime: dummy
+roles:
+    - triage
+    - coder
+    - review
+    - fix
+    - retro
+    - prioritize
+allowed_remote_resources:
+    - https://raw.githubusercontent.com/fullsend-ai/fullsend/
+    - https://raw.githubusercontent.com/fullsend-ai/agents/
+create_issues:
+    allow_targets:
+        repos:
+            - halfsend-01/test-repo
+            - fullsend-ai/fullsend
