@@ -1,1 +1,4 @@
-ops: []
+ops:
+    - description: Search for foo
+      op: url_get
+      args: https://www.google.com/search?q=foo
