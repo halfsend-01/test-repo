@@ -19,8 +19,6 @@ paths:
     - .defaults/internal/scaffold/fullsend-repo/env/code-agent.env
     - .defaults/internal/scaffold/fullsend-repo/env/fix-agent.env
     - .defaults/internal/scaffold/fullsend-repo/env/gcp-vertex.env
-    - .defaults/internal/scaffold/fullsend-repo/env/retro.env
-    - .defaults/internal/scaffold/fullsend-repo/env/review.env
     - .defaults/internal/scaffold/fullsend-repo/harness/code.yaml
     - .defaults/internal/scaffold/fullsend-repo/harness/fix.yaml
     - .defaults/internal/scaffold/fullsend-repo/harness/prioritize.yaml
