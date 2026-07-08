@@ -44,7 +44,6 @@ paths:
     - .defaults/internal/scaffold/fullsend-repo/scripts/extract-transcript-error.sh
     - .defaults/internal/scaffold/fullsend-repo/scripts/fullsend-check-output
     - .defaults/internal/scaffold/fullsend-repo/scripts/install-precommit-tools.sh
-    - .defaults/internal/scaffold/fullsend-repo/scripts/lib/github-api-csma.sh
     - .defaults/internal/scaffold/fullsend-repo/scripts/post-code-test.sh
     - .defaults/internal/scaffold/fullsend-repo/scripts/post-code.sh
     - .defaults/internal/scaffold/fullsend-repo/scripts/post-fix-test.sh
