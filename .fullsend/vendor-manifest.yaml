@@ -27,12 +27,19 @@ paths:
     - .defaults/internal/scaffold/fullsend-repo/harness/triage.yaml
     - .defaults/internal/scaffold/fullsend-repo/plugins/gopls-lsp/.lsp.json
     - .defaults/internal/scaffold/fullsend-repo/plugins/gopls-lsp/plugin.json
-    - .defaults/internal/scaffold/fullsend-repo/policies/code.yaml
-    - .defaults/internal/scaffold/fullsend-repo/policies/fix.yaml
-    - .defaults/internal/scaffold/fullsend-repo/policies/prioritize.yaml
-    - .defaults/internal/scaffold/fullsend-repo/policies/retro.yaml
-    - .defaults/internal/scaffold/fullsend-repo/policies/review.yaml
-    - .defaults/internal/scaffold/fullsend-repo/policies/triage.yaml
+    - .defaults/internal/scaffold/fullsend-repo/policies/base.yaml
+    - .defaults/internal/scaffold/fullsend-repo/profiles/fullsend-github-artifacts.yaml
+    - .defaults/internal/scaffold/fullsend-repo/profiles/fullsend-github-ro.yaml
+    - .defaults/internal/scaffold/fullsend-repo/profiles/fullsend-github.yaml
+    - .defaults/internal/scaffold/fullsend-repo/profiles/fullsend-gitleaks.yaml
+    - .defaults/internal/scaffold/fullsend-repo/profiles/fullsend-package-registries.yaml
+    - .defaults/internal/scaffold/fullsend-repo/profiles/fullsend-vertex-ai.yaml
+    - .defaults/internal/scaffold/fullsend-repo/providers/github-artifacts.yaml
+    - .defaults/internal/scaffold/fullsend-repo/providers/github-ro.yaml
+    - .defaults/internal/scaffold/fullsend-repo/providers/github.yaml
+    - .defaults/internal/scaffold/fullsend-repo/providers/gitleaks.yaml
+    - .defaults/internal/scaffold/fullsend-repo/providers/package-registries.yaml
+    - .defaults/internal/scaffold/fullsend-repo/providers/vertex-ai.yaml
     - .defaults/internal/scaffold/fullsend-repo/schemas/code-result.schema.json
     - .defaults/internal/scaffold/fullsend-repo/schemas/fix-result.schema.json
     - .defaults/internal/scaffold/fullsend-repo/schemas/prioritize-result.schema.json
