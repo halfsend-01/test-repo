@@ -1,0 +1,9 @@
+agent: agents/triage.md
+role: triage
+slug: fullsend-ai-review-ping
+model: opus
+image: ghcr.io/fullsend-ai/fullsend-sandbox:latest
+trigger: |
+  event.entity.kind == "change_proposal"
+  && event.transition.kind == "review_submitted"
+  && event.transition.review.state == "commented"
