@@ -1,1 +1,21 @@
-ops: []
+ops:
+    - description: Issue URL set
+      op: assert_env
+      args: GITHUB_ISSUE_URL
+    - description: Repo name set
+      op: assert_env
+      args: REPO_FULL_NAME
+    - description: GH token set
+      op: assert_env
+      args: GH_TOKEN
+    - description: Event payload file
+      op: assert_file
+      args: .fullsend/dispatch/event-payload.json
+    - description: Payload has issue number
+      op: assert_json
+      args: .fullsend/dispatch/event-payload.json,issue.number
+    - description: Prove execution
+      op: write_fixture
+      args: output/dispatch-ok.json, fixtures/dispatch/ok.json
+      content: |
+        {"status":"ok","source":"harness-dispatch-behaviour-test"}
