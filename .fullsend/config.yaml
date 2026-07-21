@@ -19,6 +19,8 @@ agents:
       enabled: false
     - name: review-ping
       source: harness/review-ping.yaml
+    - name: fork-pr-ping
+      source: harness/fork-pr-ping.yaml
 allowed_remote_resources:
     - https://raw.githubusercontent.com/fullsend-ai/fullsend/
     - https://raw.githubusercontent.com/fullsend-ai/agents/
