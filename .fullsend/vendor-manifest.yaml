@@ -50,6 +50,8 @@ paths:
     - .defaults/internal/scaffold/fullsend-repo/schemas/review-result.schema.json
     - .defaults/internal/scaffold/fullsend-repo/schemas/triage-result.schema.json
     - .defaults/internal/scaffold/fullsend-repo/scripts/.pre-commit-tools.yaml
+    - .defaults/internal/scaffold/fullsend-repo/scripts/dispatch-route-helpers-test.sh
+    - .defaults/internal/scaffold/fullsend-repo/scripts/dispatch-route-helpers.sh
     - .defaults/internal/scaffold/fullsend-repo/scripts/extract-transcript-error.sh
     - .defaults/internal/scaffold/fullsend-repo/scripts/fullsend-check-output
     - .defaults/internal/scaffold/fullsend-repo/scripts/install-precommit-tools.sh
