@@ -1,1 +1,9 @@
-ops: []
+ops:
+    - description: Sync PR payload
+      op: assert_json
+      args: .fullsend/dispatch/event-payload.json,pull_request.head.repo.fork
+    - description: Prove sync execution
+      op: write_fixture
+      args: output/dispatch-sync-ok.json, fixtures/dispatch/ok.json
+      content: |
+        {"status":"ok","source":"harness-dispatch-behaviour-test"}
