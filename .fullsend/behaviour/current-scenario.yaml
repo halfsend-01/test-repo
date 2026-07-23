@@ -1,1 +1,6 @@
-ops: []
+ops:
+    - description: Prove execution
+      op: write_fixture
+      args: output/dispatch-enabled-ok.json, fixtures/dispatch/ok.json
+      content: |
+        {"status":"ok","source":"harness-dispatch-behaviour-test"}
