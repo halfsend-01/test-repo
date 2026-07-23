@@ -19,6 +19,8 @@ agents:
       source: harness/pr-ping.yaml
     - name: issue-only-ping
       source: harness/issue-only-ping.yaml
+    - name: enabled-ping
+      source: harness/enabled-ping.yaml
 allowed_remote_resources:
     - https://raw.githubusercontent.com/fullsend-ai/fullsend/
     - https://raw.githubusercontent.com/fullsend-ai/agents/
