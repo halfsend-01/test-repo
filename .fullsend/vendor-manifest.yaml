@@ -9,7 +9,6 @@ paths:
     - .defaults/.github/actions/setup-gcp/action.yml
     - .defaults/.github/actions/validate-enrollment/action.yml
     - .defaults/.github/scripts/install-openshell.sh
-    - .defaults/.github/scripts/install-podman.sh
     - .defaults/.github/scripts/openshell-version.sh
     - .defaults/action.yml
     - .defaults/internal/scaffold/fullsend-repo/.github/scripts/setup-agent-env.sh
