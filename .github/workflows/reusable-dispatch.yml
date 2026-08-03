@@ -269,7 +269,7 @@ jobs:
             pull_request_target)
               case "${EVENT_ACTION}" in
                 opened|synchronize|ready_for_review)
-                  if [[ "${PR_USER_LOGIN}" =~ \[bot\]$ ]] || is_event_actor_authorized "${PR_USER_LOGIN}" triage; then
+                  if is_event_actor_authorized "${PR_USER_LOGIN}" triage; then
                     STAGE="review"
                   fi
                   ;;
@@ -1413,8 +1413,8 @@ jobs:
         uses: ./.workflow-actions/.github/actions/install-fullsend-cli
         with:
           mode: upstream
-          workflow_repository: ${{ job.workflow_repository }}
-          workflow_sha: ${{ job.workflow_sha }}
+          repository: ${{ job.workflow_repository }}
+          sha: ${{ job.workflow_sha }}
           github_token: ${{ github.token }}
 
       - name: Expose cached fullsend CLI
