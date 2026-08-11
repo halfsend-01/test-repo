@@ -20,7 +20,7 @@ create_issues:
         repos:
             - halfsend-01/test-repo
             - fullsend-ai/fullsend
-mint_url: https://bt-01f78705-bt-mint.fullsend-ai.workers.dev
+mint_url: https://bt-3d484fd5-bt-mint.fullsend-ai.workers.dev
 inference:
     project: it-gcp-konflux-e2e-fullsend
     wif_provider: projects/208332380190/locations/global/workloadIdentityPools/fullsend-inference/providers/gh-halfsend-01-test-repo
