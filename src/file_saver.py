@@ -84,20 +84,3 @@ def save_file(content: str, path: str,
         except OSError:
             pass
         raise
-
-
-def load_file(path: str) -> str:
-    """Load a UTF-8 text file.
-
-    Args:
-        path: Source file path.
-
-    Returns:
-        The file content as a string.
-
-    Raises:
-        OSError: If the file cannot be read.
-        UnicodeDecodeError: If the file contains invalid UTF-8.
-    """
-    with open(path, "r", encoding="utf-8") as f:
-        return f.read()

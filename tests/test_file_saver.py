@@ -1,14 +1,12 @@
 """Tests for the UTF-8-aware chunked file saver."""
 
 import os
-import tempfile
 
 import pytest
 
 from src.file_saver import (
     DEFAULT_CHUNK_SIZE,
     _find_utf8_safe_split,
-    load_file,
     save_file,
 )
 
@@ -76,18 +74,21 @@ class TestSaveFile:
     def test_save_ascii_small_file(self, tmp_path_file):
         content = "Hello, world!"
         save_file(content, tmp_path_file)
-        assert load_file(tmp_path_file) == content
+        with open(tmp_path_file, encoding="utf-8") as f:
+            assert f.read() == content
 
     def test_save_ascii_file_larger_than_chunk(self, tmp_path_file):
         # Use a small chunk size to exercise chunked writing.
         content = "A" * 200
         save_file(content, tmp_path_file, chunk_size=64)
-        assert load_file(tmp_path_file) == content
+        with open(tmp_path_file, encoding="utf-8") as f:
+            assert f.read() == content
 
     def test_save_utf8_file_under_64kb(self, tmp_path_file):
         content = "Hello 🌍🌎🌏 World!"
         save_file(content, tmp_path_file)
-        assert load_file(tmp_path_file) == content
+        with open(tmp_path_file, encoding="utf-8") as f:
+            assert f.read() == content
 
     def test_save_utf8_file_over_64kb_with_emoji(self, tmp_path_file):
         """Core regression test: >64KB file with emoji should save
@@ -101,8 +102,8 @@ class TestSaveFile:
         assert len(content.encode("utf-8")) > DEFAULT_CHUNK_SIZE
 
         save_file(content, tmp_path_file)
-        result = load_file(tmp_path_file)
-        assert result == content
+        with open(tmp_path_file, encoding="utf-8") as f:
+            assert f.read() == content
 
     def test_save_utf8_file_over_64kb_with_cjk(self, tmp_path_file):
         """CJK characters (3-byte UTF-8) crossing the 64KB boundary."""
@@ -113,8 +114,8 @@ class TestSaveFile:
         assert len(content.encode("utf-8")) > DEFAULT_CHUNK_SIZE
 
         save_file(content, tmp_path_file)
-        result = load_file(tmp_path_file)
-        assert result == content
+        with open(tmp_path_file, encoding="utf-8") as f:
+            assert f.read() == content
 
     def test_save_entirely_multibyte_over_64kb(self, tmp_path_file):
         """File consisting entirely of 4-byte emoji over 64KB."""
@@ -124,8 +125,8 @@ class TestSaveFile:
         assert len(content.encode("utf-8")) > DEFAULT_CHUNK_SIZE
 
         save_file(content, tmp_path_file)
-        result = load_file(tmp_path_file)
-        assert result == content
+        with open(tmp_path_file, encoding="utf-8") as f:
+            assert f.read() == content
 
     def test_multibyte_char_at_exact_boundary(self, tmp_path_file):
         """4-byte emoji placed so it straddles bytes 65534-65538."""
@@ -140,19 +141,30 @@ class TestSaveFile:
         assert encoded[65534:65538] == boundary_char.encode("utf-8")
 
         save_file(content, tmp_path_file)
-        result = load_file(tmp_path_file)
-        assert result == content
+        with open(tmp_path_file, encoding="utf-8") as f:
+            assert f.read() == content
 
     def test_small_chunk_size_with_multibyte(self, tmp_path_file):
         """Exercise boundary handling with a very small chunk size."""
         content = "Hello 😀🎉🌍 World 中文 Test"
         save_file(content, tmp_path_file, chunk_size=8)
-        result = load_file(tmp_path_file)
-        assert result == content
+        with open(tmp_path_file, encoding="utf-8") as f:
+            assert f.read() == content
+
+    def test_chunk_size_smaller_than_char_triggers_fallback(
+        self, tmp_path_file
+    ):
+        """Chunk size smaller than a multibyte character triggers the
+        defensive fallback that advances by one full character width."""
+        content = "😀🎉"  # Two 4-byte emoji = 8 bytes total
+        save_file(content, tmp_path_file, chunk_size=1)
+        with open(tmp_path_file, encoding="utf-8") as f:
+            assert f.read() == content
 
     def test_empty_file(self, tmp_path_file):
         save_file("", tmp_path_file)
-        assert load_file(tmp_path_file) == ""
+        with open(tmp_path_file, encoding="utf-8") as f:
+            assert f.read() == ""
 
     def test_no_temp_file_on_success(self, tmp_path_file):
         save_file("test", tmp_path_file)
@@ -163,16 +175,3 @@ class TestSaveFile:
         with pytest.raises(OSError):
             save_file("test", bad_path)
         assert not os.path.exists(bad_path + ".tmp")
-
-
-class TestLoadFile:
-    """Tests for load_file."""
-
-    def test_load_utf8_file(self, tmp_path_file):
-        content = "Hello 🌍 World!"
-        save_file(content, tmp_path_file)
-        assert load_file(tmp_path_file) == content
-
-    def test_load_nonexistent_file(self):
-        with pytest.raises(OSError):
-            load_file("/nonexistent/path/file.txt")
