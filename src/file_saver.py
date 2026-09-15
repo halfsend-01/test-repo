@@ -6,7 +6,6 @@ multibyte characters that straddle chunk boundaries.
 """
 
 import os
-import tempfile
 
 # Default chunk size: 64KB
 DEFAULT_CHUNK_SIZE = 65536
@@ -60,44 +59,32 @@ def save_file(content: str, path: str) -> None:
         OSError: If the file cannot be written.
     """
     data = content.encode("utf-8")
-    dest_dir = os.path.dirname(path) or "."
-    fd, tmp_path = tempfile.mkstemp(dir=dest_dir, suffix=".tmp")
 
-    try:
-        with os.fdopen(fd, "wb") as f:
-            offset = 0
-            while offset < len(data):
-                remaining = len(data) - offset
-                if remaining <= DEFAULT_CHUNK_SIZE:
-                    f.write(data[offset:])
-                    break
+    with open(path, "wb") as f:
+        offset = 0
+        while offset < len(data):
+            remaining = len(data) - offset
+            if remaining <= DEFAULT_CHUNK_SIZE:
+                f.write(data[offset:])
+                break
 
-                split = _find_utf8_safe_split(
-                    data, offset + DEFAULT_CHUNK_SIZE
-                ) - offset
-                # Defensive: if split is zero (extremely unlikely with
-                # valid UTF-8), advance by one full character width
-                # based on the lead byte to avoid an infinite loop.
-                if split <= 0:
-                    lead = data[offset]
-                    if lead < 0x80:
-                        split = 1
-                    elif lead < 0xE0:
-                        split = 2
-                    elif lead < 0xF0:
-                        split = 3
-                    else:
-                        split = 4
-                    split = min(split, remaining)
+            split = _find_utf8_safe_split(
+                data, offset + DEFAULT_CHUNK_SIZE
+            ) - offset
+            # Defensive: if split is zero (extremely unlikely with
+            # valid UTF-8), advance by one full character width
+            # based on the lead byte to avoid an infinite loop.
+            if split <= 0:
+                lead = data[offset]
+                if lead < 0x80:
+                    split = 1
+                elif lead < 0xE0:
+                    split = 2
+                elif lead < 0xF0:
+                    split = 3
+                else:
+                    split = 4
+                split = min(split, remaining)
 
-                f.write(data[offset:offset + split])
-                offset += split
-
-        os.replace(tmp_path, path)
-    except BaseException:
-        # Clean up partial temp file on any failure.
-        try:
-            os.unlink(tmp_path)
-        except OSError:
-            pass
-        raise
+            f.write(data[offset:offset + split])
+            offset += split

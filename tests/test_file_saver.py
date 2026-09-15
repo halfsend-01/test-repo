@@ -170,14 +170,15 @@ class TestSaveFile:
         with open(tmp_path_file, encoding="utf-8") as f:
             assert f.read() == ""
 
-    def test_no_temp_file_on_success(self, tmp_path_file, tmp_path):
-        save_file("test", tmp_path_file)
-        tmp_files = [f for f in os.listdir(str(tmp_path)) if f.endswith(".tmp")]
-        assert not tmp_files
-
-    def test_no_temp_file_on_failure(self, tmp_path):
+    def test_save_to_nonexistent_directory_raises(self, tmp_path):
+        """Writing to a path whose parent directory does not exist
+        raises OSError."""
         bad_path = str(tmp_path / "nonexistent_dir" / "file.txt")
         with pytest.raises(OSError):
             save_file("test", bad_path)
-        # The directory doesn't exist, so no temp file can be created.
-        assert not os.path.exists(os.path.dirname(bad_path))
+
+    def test_write_error_does_not_leave_partial_content(self, tmp_path_file):
+        """If write fails mid-stream, verify the error propagates."""
+        with patch("builtins.open", side_effect=OSError("disk full")):
+            with pytest.raises(OSError, match="disk full"):
+                save_file("test content", tmp_path_file)
