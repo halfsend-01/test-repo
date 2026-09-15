@@ -1,6 +1,7 @@
 """Tests for the UTF-8-aware chunked file saver."""
 
 import os
+from unittest.mock import patch
 
 import pytest
 
@@ -77,10 +78,11 @@ class TestSaveFile:
         with open(tmp_path_file, encoding="utf-8") as f:
             assert f.read() == content
 
+    @patch("src.file_saver.DEFAULT_CHUNK_SIZE", 64)
     def test_save_ascii_file_larger_than_chunk(self, tmp_path_file):
         # Use a small chunk size to exercise chunked writing.
         content = "A" * 200
-        save_file(content, tmp_path_file, chunk_size=64)
+        save_file(content, tmp_path_file)
         with open(tmp_path_file, encoding="utf-8") as f:
             assert f.read() == content
 
@@ -144,20 +146,22 @@ class TestSaveFile:
         with open(tmp_path_file, encoding="utf-8") as f:
             assert f.read() == content
 
+    @patch("src.file_saver.DEFAULT_CHUNK_SIZE", 8)
     def test_small_chunk_size_with_multibyte(self, tmp_path_file):
         """Exercise boundary handling with a very small chunk size."""
         content = "Hello 😀🎉🌍 World 中文 Test"
-        save_file(content, tmp_path_file, chunk_size=8)
+        save_file(content, tmp_path_file)
         with open(tmp_path_file, encoding="utf-8") as f:
             assert f.read() == content
 
+    @patch("src.file_saver.DEFAULT_CHUNK_SIZE", 1)
     def test_chunk_size_smaller_than_char_triggers_fallback(
         self, tmp_path_file
     ):
         """Chunk size smaller than a multibyte character triggers the
         defensive fallback that advances by one full character width."""
         content = "😀🎉"  # Two 4-byte emoji = 8 bytes total
-        save_file(content, tmp_path_file, chunk_size=1)
+        save_file(content, tmp_path_file)
         with open(tmp_path_file, encoding="utf-8") as f:
             assert f.read() == content
 
