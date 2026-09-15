@@ -22,10 +22,12 @@ class TestFindUtf8SafeSplit:
     """Tests for _find_utf8_safe_split."""
 
     def test_ascii_only(self):
+        """Split within ASCII data returns the requested position."""
         data = b"Hello, world!"
         assert _find_utf8_safe_split(data, 5) == 5
 
     def test_split_before_two_byte_char(self):
+        """Split landing on a 2-byte continuation byte backs up."""
         # 'é' is 0xC3 0xA9 (2 bytes)
         data = b"abc\xc3\xa9def"
         # Splitting at 4 lands on the continuation byte 0xA9;
@@ -33,16 +35,19 @@ class TestFindUtf8SafeSplit:
         assert _find_utf8_safe_split(data, 4) == 3
 
     def test_split_at_two_byte_char_start(self):
+        """Split at a 2-byte lead byte is safe."""
         data = b"abc\xc3\xa9def"
         # Splitting at 3 lands on the lead byte 0xC3 — that's safe.
         assert _find_utf8_safe_split(data, 3) == 3
 
     def test_split_after_two_byte_char(self):
+        """Split after a complete 2-byte character is safe."""
         data = b"abc\xc3\xa9def"
         # Splitting at 5 lands on 'd' — safe.
         assert _find_utf8_safe_split(data, 5) == 5
 
     def test_split_inside_three_byte_char(self):
+        """Split landing inside a 3-byte character backs up."""
         # '€' is 0xE2 0x82 0xAC (3 bytes)
         data = b"ab\xe2\x82\xaccd"
         # Splitting at 3 lands on continuation 0x82 → back up to 2.
@@ -51,6 +56,7 @@ class TestFindUtf8SafeSplit:
         assert _find_utf8_safe_split(data, 4) == 2
 
     def test_split_inside_four_byte_char(self):
+        """Split landing inside a 4-byte character backs up."""
         # '😀' (U+1F600) is 0xF0 0x9F 0x98 0x80 (4 bytes)
         data = b"a\xf0\x9f\x98\x80b"
         # Splitting at 2 lands on 0x9F → back up to 1.
@@ -61,10 +67,12 @@ class TestFindUtf8SafeSplit:
         assert _find_utf8_safe_split(data, 4) == 1
 
     def test_max_size_exceeds_data_length(self):
+        """max_size beyond data length returns data length."""
         data = b"short"
         assert _find_utf8_safe_split(data, 100) == 5
 
     def test_max_size_equals_data_length(self):
+        """max_size exactly equal to data length returns data length."""
         data = b"exact"
         assert _find_utf8_safe_split(data, 5) == 5
 
@@ -73,6 +81,7 @@ class TestSaveFile:
     """Tests for save_file."""
 
     def test_save_ascii_small_file(self, tmp_path_file):
+        """Small ASCII file saves correctly without chunking."""
         content = "Hello, world!"
         save_file(content, tmp_path_file)
         with open(tmp_path_file, encoding="utf-8") as f:
@@ -80,13 +89,14 @@ class TestSaveFile:
 
     @patch("src.file_saver.DEFAULT_CHUNK_SIZE", 64)
     def test_save_ascii_file_larger_than_chunk(self, tmp_path_file):
-        # Use a small chunk size to exercise chunked writing.
+        """ASCII file larger than chunk size writes correctly."""
         content = "A" * 200
         save_file(content, tmp_path_file)
         with open(tmp_path_file, encoding="utf-8") as f:
             assert f.read() == content
 
     def test_save_utf8_file_under_64kb(self, tmp_path_file):
+        """UTF-8 file under 64KB saves without chunking."""
         content = "Hello 🌍🌎🌏 World!"
         save_file(content, tmp_path_file)
         with open(tmp_path_file, encoding="utf-8") as f:
@@ -166,6 +176,7 @@ class TestSaveFile:
             assert f.read() == content
 
     def test_empty_file(self, tmp_path_file):
+        """Empty string produces an empty file."""
         save_file("", tmp_path_file)
         with open(tmp_path_file, encoding="utf-8") as f:
             assert f.read() == ""
@@ -177,8 +188,8 @@ class TestSaveFile:
         with pytest.raises(OSError):
             save_file("test", bad_path)
 
-    def test_write_error_does_not_leave_partial_content(self, tmp_path_file):
-        """If write fails mid-stream, verify the error propagates."""
+    def test_open_error_propagates(self, tmp_path_file):
+        """OSError from open() propagates to the caller."""
         with patch("builtins.open", side_effect=OSError("disk full")):
             with pytest.raises(OSError, match="disk full"):
                 save_file("test content", tmp_path_file)

@@ -5,8 +5,6 @@ when splitting data into fixed-size chunks, preventing corruption of
 multibyte characters that straddle chunk boundaries.
 """
 
-import os
-
 # Default chunk size: 64KB
 DEFAULT_CHUNK_SIZE = 65536
 
