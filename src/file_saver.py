@@ -6,6 +6,7 @@ multibyte characters that straddle chunk boundaries.
 """
 
 import os
+import tempfile
 
 # Default chunk size: 64KB
 DEFAULT_CHUNK_SIZE = 65536
@@ -59,10 +60,11 @@ def save_file(content: str, path: str) -> None:
         OSError: If the file cannot be written.
     """
     data = content.encode("utf-8")
-    tmp_path = path + ".tmp"
+    dest_dir = os.path.dirname(path) or "."
+    fd, tmp_path = tempfile.mkstemp(dir=dest_dir, suffix=".tmp")
 
     try:
-        with open(tmp_path, "wb") as f:
+        with os.fdopen(fd, "wb") as f:
             offset = 0
             while offset < len(data):
                 remaining = len(data) - offset

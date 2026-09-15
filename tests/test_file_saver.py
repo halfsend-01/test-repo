@@ -170,12 +170,14 @@ class TestSaveFile:
         with open(tmp_path_file, encoding="utf-8") as f:
             assert f.read() == ""
 
-    def test_no_temp_file_on_success(self, tmp_path_file):
+    def test_no_temp_file_on_success(self, tmp_path_file, tmp_path):
         save_file("test", tmp_path_file)
-        assert not os.path.exists(tmp_path_file + ".tmp")
+        tmp_files = [f for f in os.listdir(str(tmp_path)) if f.endswith(".tmp")]
+        assert not tmp_files
 
     def test_no_temp_file_on_failure(self, tmp_path):
         bad_path = str(tmp_path / "nonexistent_dir" / "file.txt")
         with pytest.raises(OSError):
             save_file("test", bad_path)
-        assert not os.path.exists(bad_path + ".tmp")
+        # The directory doesn't exist, so no temp file can be created.
+        assert not os.path.exists(os.path.dirname(bad_path))
