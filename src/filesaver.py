@@ -15,7 +15,7 @@ def _find_safe_split(data: bytes, offset: int) -> int:
     UTF-8 sequence.
 
     UTF-8 continuation bytes have the bit pattern 10xxxxxx (0x80..0xBF).
-    Walking backwards from *offset* until we land on a non-continuation
+    Walking backwards from offset until we land on a non-continuation
     byte gives us the start of the character that straddles the boundary.
     We split just before that character so neither chunk contains a
     partial sequence.
@@ -30,10 +30,10 @@ def _find_safe_split(data: bytes, offset: int) -> int:
 
 
 def save_file(path: str, content: str) -> None:
-    """Save *content* to *path* in 64KB chunks, respecting UTF-8 boundaries.
+    """Save content to path in 64KB chunks, respecting UTF-8 boundaries.
 
-    Encodes *content* to UTF-8 bytes, then writes in chunks of up to
-    ``CHUNK_SIZE`` bytes, adjusting each boundary so that no multibyte
+    Encodes content to UTF-8 bytes, then writes in chunks of up to
+    CHUNK_SIZE bytes, adjusting each boundary so that no multibyte
     character is split across chunks.
     """
     encoded = content.encode("utf-8")
@@ -43,11 +43,10 @@ def save_file(path: str, content: str) -> None:
             end = min(offset + CHUNK_SIZE, len(encoded))
             if end < len(encoded):
                 end = _find_safe_split(encoded, end)
+            if end <= offset:
+                raise ValueError(
+                    "No progress: chunk too small for multibyte character "
+                    "at this offset"
+                )
             fh.write(encoded[offset:end])
             offset = end
-
-
-def load_file(path: str) -> str:
-    """Read a file written by :func:`save_file` and return its text."""
-    with open(path, "r", encoding="utf-8") as fh:
-        return fh.read()

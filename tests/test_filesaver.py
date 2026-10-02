@@ -5,20 +5,26 @@ import tempfile
 
 import pytest
 
-from src.filesaver import CHUNK_SIZE, _find_safe_split, load_file, save_file
+from src.filesaver import CHUNK_SIZE, _find_safe_split, save_file
 
 
 # ---------------------------------------------------------------------------
 # Helper
 # ---------------------------------------------------------------------------
 
+def _load_file(path: str) -> str:
+    """Read a file written by save_file and return its text."""
+    with open(path, "r", encoding="utf-8") as fh:
+        return fh.read()
+
+
 def _roundtrip(content: str) -> str:
-    """Save *content* to a temp file and read it back."""
+    """Save content to a temp file and read it back."""
     with tempfile.NamedTemporaryFile(delete=False, suffix=".txt") as tmp:
         path = tmp.name
     try:
         save_file(path, content)
-        return load_file(path)
+        return _load_file(path)
     finally:
         os.unlink(path)
 
@@ -44,6 +50,14 @@ class TestFindSafeSplit:
         # The emoji starts at byte 10. Splitting at byte 12 (mid-emoji)
         # must back up to byte 10.
         assert _find_safe_split(data, 12) == 10
+
+    def test_split_before_three_byte_char(self):
+        # '日' (U+65E5) is 3 bytes: E6 97 A5
+        data = ("aaa" + "日" + "bbb").encode("utf-8")  # b'aaa\xe6\x97\xa5bbb'
+        # offset 4 lands on 0x97 (continuation) → back up to 3
+        assert _find_safe_split(data, 4) == 3
+        # offset 5 lands on 0xA5 (continuation) → back up to 3
+        assert _find_safe_split(data, 5) == 3
 
     def test_split_at_end(self):
         data = b"abc"
@@ -97,3 +111,7 @@ class TestSaveFileUTF8:
         """Verify round-trip: saved content matches original."""
         content = "🎵 Music 🎶 " * 8000
         assert _roundtrip(content) == content
+
+    def test_empty_string(self):
+        """Round-trip an empty string through save_file and load."""
+        assert _roundtrip("") == ""
