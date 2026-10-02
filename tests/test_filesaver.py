@@ -3,8 +3,6 @@
 import os
 import tempfile
 
-import pytest
-
 from src.filesaver import CHUNK_SIZE, _find_safe_split, save_file
 
 
@@ -35,16 +33,19 @@ def _roundtrip(content: str) -> str:
 
 class TestFindSafeSplit:
     def test_ascii_split(self):
+        """Split mid-ASCII always returns the requested offset."""
         data = b"hello world"
         assert _find_safe_split(data, 5) == 5  # mid-ASCII is always safe
 
     def test_split_before_two_byte_char(self):
+        """Split inside a 2-byte character backs up to its start."""
         # 'é' is 0xC3 0xA9 (2 bytes). Splitting between them must back up.
         data = "aaaébbb".encode("utf-8")  # b'aaa\xc3\xa9bbb'
         # offset 4 lands on 0xA9 (continuation) → back up to 3
         assert _find_safe_split(data, 4) == 3
 
     def test_split_before_four_byte_char(self):
+        """Split inside a 4-byte emoji backs up to its start."""
         # '😀' (U+1F600) is 4 bytes: F0 9F 98 80
         data = ("a" * 10 + "😀" + "b" * 10).encode("utf-8")
         # The emoji starts at byte 10. Splitting at byte 12 (mid-emoji)
@@ -52,6 +53,7 @@ class TestFindSafeSplit:
         assert _find_safe_split(data, 12) == 10
 
     def test_split_before_three_byte_char(self):
+        """Split inside a 3-byte CJK character backs up to its start."""
         # '日' (U+65E5) is 3 bytes: E6 97 A5
         data = ("aaa" + "日" + "bbb").encode("utf-8")  # b'aaa\xe6\x97\xa5bbb'
         # offset 4 lands on 0x97 (continuation) → back up to 3
@@ -60,6 +62,7 @@ class TestFindSafeSplit:
         assert _find_safe_split(data, 5) == 3
 
     def test_split_at_end(self):
+        """Offset past the end returns the data length."""
         data = b"abc"
         assert _find_safe_split(data, 10) == 3  # past the end
 
@@ -115,3 +118,16 @@ class TestSaveFileUTF8:
     def test_empty_string(self):
         """Round-trip an empty string through save_file and load."""
         assert _roundtrip("") == ""
+
+    def test_no_progress_raises_value_error(self):
+        """ValueError is raised when chunk size prevents forward progress."""
+        import src.filesaver as mod
+        original = mod.CHUNK_SIZE
+        mod.CHUNK_SIZE = 1
+        try:
+            save_file("/tmp/test_noprog.txt", "é")
+            assert False, "Expected ValueError was not raised"
+        except ValueError as exc:
+            assert "No progress" in str(exc)
+        finally:
+            mod.CHUNK_SIZE = original
