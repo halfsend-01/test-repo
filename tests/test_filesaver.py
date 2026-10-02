@@ -3,6 +3,8 @@
 import os
 import tempfile
 
+import pytest
+
 from src.filesaver import CHUNK_SIZE, _find_safe_split, save_file
 
 
@@ -125,9 +127,13 @@ class TestSaveFileUTF8:
         original = mod.CHUNK_SIZE
         mod.CHUNK_SIZE = 1
         try:
-            save_file("/tmp/test_noprog.txt", "é")
-            assert False, "Expected ValueError was not raised"
-        except ValueError as exc:
-            assert "No progress" in str(exc)
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".txt") as tmp:
+                path = tmp.name
+            try:
+                with pytest.raises(ValueError, match="No progress"):
+                    save_file(path, "é")
+            finally:
+                if os.path.exists(path):
+                    os.unlink(path)
         finally:
             mod.CHUNK_SIZE = original
